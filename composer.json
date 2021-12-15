@@ -1,7 +1,7 @@
 {  "name": "sbwerewolf/subprocess-logger",
     "description": "Library for logging of subprocess events",
     "type": "library",
-    "license": "ALv2",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Nikolay Volkhin",
