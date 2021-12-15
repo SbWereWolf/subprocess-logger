@@ -86,9 +86,9 @@ class ArchivistTest extends TestCase
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $archivist = (new ArchivistFactory())
             ->setConverting($this->toLevel)
-            ->setGlobal($global)
-            ->setLocal(uniqid())
-            ->setMaximal($maximal)
+            ->setParent($global)
+            ->setChild(uniqid())
+            ->setLevel($maximal)
             ->make($logger);
 
         return $archivist;

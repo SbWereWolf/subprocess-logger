@@ -22,12 +22,12 @@ interface IData extends JsonSerializable
     /**
      * @return string
      */
-    public function getGlobal(): string;
+    public function getParent(): string;
 
     /**
      * @return string
      */
-    public function getLocal(): string;
+    public function getChild(): string;
 
     /**
      * @return array

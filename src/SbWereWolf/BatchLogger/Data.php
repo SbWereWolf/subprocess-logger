@@ -6,23 +6,23 @@ class Data implements IData
 {
     private $unixTime;
     private int $level;
-    private string $global;
-    private string $local;
+    private string $parent;
+    private string $child;
     private string $message;
     private array $context;
 
     public function __construct(
         string $message,
         int $level,
-        string $global,
-        string $local,
+        string $parent,
+        string $child,
         float $unixTime,
         array $context
     ) {
         $this->message = $message;
         $this->level = $level;
-        $this->global = $global;
-        $this->local = $local;
+        $this->parent = $parent;
+        $this->child = $child;
         $this->unixTime = $unixTime;
         $this->context = $context;
     }
@@ -54,17 +54,17 @@ class Data implements IData
     /**
      * @return string
      */
-    public function getGlobal(): string
+    public function getParent(): string
     {
-        return $this->global;
+        return $this->parent;
     }
 
     /**
      * @return string
      */
-    public function getLocal(): string
+    public function getChild(): string
     {
-        return $this->local;
+        return $this->child;
     }
 
     public function jsonSerialize()

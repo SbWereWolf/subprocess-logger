@@ -7,38 +7,38 @@ use Exception;
 class DataFactory implements IDataFactory
 {
     private int $level;
-    private string $global;
-    private string $local;
+    private string $parent;
+    private string $child;
     private string $message;
     private array $context = [];
     private bool $isLevelSet;
     private ILevel $handler;
 
     /**
-     * @param string $global
-     * @param string $local
+     * @param string $parent
+     * @param string $child
      * @param ILevel $handler
      * @throws Exception
      */
     public function __construct(
-        string $global,
-        string $local,
+        string $parent,
+        string $child,
         ILevel $handler
     ) {
-        if (empty($global)) {
+        if (empty($parent)) {
             throw new Exception(
-                "The global identity of process should not be empty",
+                "The parent identity of process should not be empty",
                 -670
             );
         }
-        if (empty($local)) {
+        if (empty($child)) {
             throw new Exception(
-                "The local identity of process should not be empty",
+                "The child identity of process should not be empty",
                 -671
             );
         }
-        $this->global = $global;
-        $this->local = $local;
+        $this->parent = $parent;
+        $this->child = $child;
         $this->handler = $handler;
     }
 
@@ -47,13 +47,13 @@ class DataFactory implements IDataFactory
         if (
             !$this->isLevelSet ||
             empty($this->message) ||
-            empty($this->global) ||
-            empty($this->local)
+            empty($this->parent) ||
+            empty($this->child)
         ) {
             throw new Exception(
                 "The message `{$this->message}`" .
-                " or the global id `{$this->global}`" .
-                " or the local id `{$this->local}`" .
+                " or the parent id `{$this->parent}`" .
+                " or the child id `{$this->child}`" .
                 " should not be empty",
                 -666
             );
@@ -61,8 +61,8 @@ class DataFactory implements IDataFactory
         $result = new Data(
             $this->message,
             $this->level,
-            $this->global,
-            $this->local,
+            $this->parent,
+            $this->child,
             microtime(
                 true
             ),

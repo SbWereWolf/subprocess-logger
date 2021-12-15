@@ -42,8 +42,8 @@ class Printer implements IPrinter
                     [
                         'UnixTime' => $message->getUnixTime(),
                         'Level' => $message->getLevel(),
-                        'Global' => $message->getGlobal(),
-                        'Local' => $message->getLocal(),
+                        'Global' => $message->getParent(),
+                        'Local' => $message->getChild(),
                     ]
                 );
             }

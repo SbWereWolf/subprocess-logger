@@ -2,25 +2,25 @@
 
 namespace SbWereWolf\BatchLogger;
 
-use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
 
 class ArchivistFactory
 {
     private array $nameToLevel;
-    private string $global;
-    private string $local;
-    private string $maximal;
+    private string $parent;
+    private string $child;
+    private string $level;
 
-    public function make(AbstractLogger $logger): IArchivist
+    public function make(LoggerInterface $logger): IArchivist
     {
         $handler = new Level($this->nameToLevel);
         $factory = new DataFactory(
-            $this->global,
-            $this->local,
+            $this->parent,
+            $this->child,
             $handler
         );
 
-        $printer = new Printer($this->maximal, $handler, $logger);
+        $printer = new Printer($this->level, $handler, $logger);
         $journal = new Journal($factory);
         $archivist = new Archivist($journal, $printer);
 
@@ -34,6 +34,7 @@ class ArchivistFactory
     public function setConverting(array $nameToLevel): static
     {
         $this->nameToLevel = $nameToLevel;
+
         return $this;
     }
 
@@ -41,9 +42,10 @@ class ArchivistFactory
      * @param string $global
      * @return ArchivistFactory
      */
-    public function setGlobal(string $global): static
+    public function setParent(string $global): static
     {
-        $this->global = $global;
+        $this->parent = $global;
+
         return $this;
     }
 
@@ -51,19 +53,21 @@ class ArchivistFactory
      * @param string $local
      * @return ArchivistFactory
      */
-    public function setLocal(string $local): static
+    public function setChild(string $local): static
     {
-        $this->local = $local;
+        $this->child = $local;
+
         return $this;
     }
 
     /**
-     * @param string $maximal
+     * @param string $level
      * @return ArchivistFactory
      */
-    public function setMaximal(string $maximal): static
+    public function setLevel(string $level): static
     {
-        $this->maximal = $maximal;
+        $this->level = $level;
+
         return $this;
     }
 
