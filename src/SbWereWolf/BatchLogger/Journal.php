@@ -2,6 +2,7 @@
 
 namespace SbWereWolf\BatchLogger;
 
+use Exception;
 use Psr\Log\AbstractLogger;
 use Stringable;
 
@@ -12,15 +13,23 @@ class Journal extends AbstractLogger implements IJournal
 
     public function __construct(
         IDataFactory $factory
-    ) {
+    )
+    {
         $this->factory = $factory;
     }
 
+    /**
+     * @param mixed $level
+     * @param Stringable|string $message
+     * @param array $context
+     * @throws Exception
+     */
     public function log(
         $level,
         Stringable|string $message,
         array $context = []
-    ): void {
+    ): void
+    {
         $record = $this->factory
             ->setLevel($level)
             ->setMessage($message)

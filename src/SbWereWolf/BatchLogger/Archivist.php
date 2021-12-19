@@ -36,7 +36,7 @@ class Archivist extends AbstractLogger implements IArchivist
         $this->journal->log($level, $message, $context);
     }
 
-    public function failure(string $levelName, string $message): static
+    public function writeDetails(string $levelName, string $message): static
     {
         $this->log($levelName, $message);
 
@@ -48,7 +48,7 @@ class Archivist extends AbstractLogger implements IArchivist
         return $this;
     }
 
-    public function success(string $levelName, string $message): static
+    public function writeBrief(string $levelName, string $message): static
     {
         $this->journal->reset();
 

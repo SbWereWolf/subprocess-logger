@@ -9,10 +9,9 @@ namespace Integration;
 
 use Exception;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\AbstractLogger;
 use Psr\Log\LogLevel;
-use SbWereWolf\BatchLogger\Archivist;
 use SbWereWolf\BatchLogger\ArchivistFactory;
+use SbWereWolf\BatchLogger\IArchivist;
 use Throwable;
 
 class ArchivistTest extends TestCase
@@ -58,9 +57,12 @@ class ArchivistTest extends TestCase
         try {
             $archivist->start(LogLevel::NOTICE, 'start test');
             $archivist->debug('some debug info');
-            $archivist->success(LogLevel::NOTICE, 'finish with success');
+            $archivist->writeBrief(
+                LogLevel::NOTICE,
+                'finish with success'
+            );
         } catch (Throwable) {
-            $archivist->failure(
+            $archivist->writeDetails(
                 LogLevel::NOTICE,
                 'finish with failure'
             );
@@ -74,14 +76,15 @@ class ArchivistTest extends TestCase
      * @param string $global
      * @param string $maximal
      * @param $file
-     * @return Archivist
+     * @return IArchivist
      * @throws Exception
      */
     private function getArchivist(
         string $global,
         string $maximal,
         $file
-    ): Archivist {
+    ): IArchivist
+    {
         $logger = new FileLogger($file);
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $archivist = (new ArchivistFactory())
@@ -122,7 +125,7 @@ class ArchivistTest extends TestCase
                 " trace:{$e->getTraceAsString()}";
             $archivist->critical($message);
 
-            $archivist->failure(
+            $archivist->writeDetails(
                 LogLevel::NOTICE,
                 'finish with failure'
             );
@@ -154,12 +157,12 @@ class ArchivistTest extends TestCase
         try {
             $archivist->start(LogLevel::NOTICE, 'start test');
             $this->withLogger($archivist);
-            $archivist->success(LogLevel::NOTICE, 'finish test');
+            $archivist->writeBrief(LogLevel::NOTICE, 'finish test');
         } catch (Throwable $e) {
             $message = "message: {$e->getMessage()}," .
                 " trace:{$e->getTraceAsString()}";
             $archivist->critical($message);
-            $archivist->failure(
+            $archivist->writeDetails(
                 LogLevel::NOTICE,
                 'finish with failure'
             );
@@ -170,9 +173,10 @@ class ArchivistTest extends TestCase
     }
 
     /**
+     * @param IArchivist $journal
      * @throws Exception
      */
-    private function withLogger(AbstractLogger $journal): void
+    private function withLogger(IArchivist $journal): void
     {
         $journal->info('sub function start');
         $journal->debug('some debug info');
@@ -204,12 +208,12 @@ class ArchivistTest extends TestCase
 
             $this->independentLogger($global);
 
-            $archivist->success(LogLevel::NOTICE, 'finish test');
+            $archivist->writeBrief(LogLevel::NOTICE, 'finish test');
         } catch (Throwable $e) {
             $message = "message: {$e->getMessage()}," .
                 " trace:{$e->getTraceAsString()}";
             $archivist->critical($message);
-            $archivist->failure(
+            $archivist->writeDetails(
                 LogLevel::NOTICE,
                 'finish with failure'
             );
@@ -248,7 +252,7 @@ class ArchivistTest extends TestCase
             $message = "message: {$e->getMessage()}," .
                 " trace:{$e->getTraceAsString()}";
             $archivist->emergency($message);
-            $archivist->failure(LogLevel::NOTICE, 'sub function fail');
+            $archivist->writeDetails(LogLevel::NOTICE, 'sub function fail');
         }
         fclose($file);
     }

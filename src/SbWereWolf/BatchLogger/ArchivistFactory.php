@@ -2,6 +2,7 @@
 
 namespace SbWereWolf\BatchLogger;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 
 class ArchivistFactory
@@ -11,6 +12,11 @@ class ArchivistFactory
     private string $child;
     private string $level;
 
+    /**
+     * @param LoggerInterface $logger
+     * @return IArchivist
+     * @throws Exception
+     */
     public function make(LoggerInterface $logger): IArchivist
     {
         $handler = new Level($this->nameToLevel);
@@ -22,6 +28,7 @@ class ArchivistFactory
 
         $printer = new Printer($this->level, $handler, $logger);
         $journal = new Journal($factory);
+        /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $archivist = new Archivist($journal, $printer);
 
         return $archivist;
@@ -39,23 +46,23 @@ class ArchivistFactory
     }
 
     /**
-     * @param string $global
+     * @param string $parent
      * @return ArchivistFactory
      */
-    public function setParent(string $global): static
+    public function setParent(string $parent): static
     {
-        $this->parent = $global;
+        $this->parent = $parent;
 
         return $this;
     }
 
     /**
-     * @param string $local
+     * @param string $child
      * @return ArchivistFactory
      */
-    public function setChild(string $local): static
+    public function setChild(string $child): static
     {
-        $this->child = $local;
+        $this->child = $child;
 
         return $this;
     }

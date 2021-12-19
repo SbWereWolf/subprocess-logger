@@ -6,18 +6,17 @@ use Psr\Log\LoggerInterface;
 
 interface IArchivist extends LoggerInterface
 {
-
     public function start(
         string $levelName,
         string $message
     ): IArchivist;
 
-    public function failure(
+    public function writeDetails(
         string $levelName,
         string $message
     ): IArchivist;
 
-    public function success(
+    public function writeBrief(
         string $levelName,
         string $message
     ): IArchivist;
