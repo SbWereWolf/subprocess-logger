@@ -16,70 +16,85 @@
 Именно для такого использования был разработан
 `SbWereWolf\BatchLogger\Archivist`.
 
-Работать с ним очень просто. У него всего три метода.
+Работать с ним очень просто.
 
-Создание списка сообщений `Archivist::start()`.
+Делаем запись о начале работы `Archivist::start()`.
 
-Сохранения всех сообщений, если произошел сбой `Archivist::failure()`.
+Если произошел сбой, то сохраняем подробный журнала сообщений, 
+`Archivist::writeDetails()`.
 
-Если сбой не произошёл, то используем метод для записи в логи
-сообщения об успешном завершении процесса (алгоритма)
-`Archivist::success()`.
+Если сбой не произошёл, то делаем короткую запись об успехе выполнения
+`Archivist::writeBrief()`.
 
 # Пример использования
+
 ```php
-        $filePath = date('Ymd') . '.log';
-        $file = fopen($filePath, 'a');        
-        $logger = new FileLogger($file);
-        
-        $toLevel = [
-                LogLevel::DEBUG => self::DEBUG,
-                LogLevel::INFO => self::INFO,
-                LogLevel::NOTICE => self::NOTICE,
-                LogLevel::WARNING => self::WARNING,
-                LogLevel::ERROR => self::ERROR,
-                LogLevel::CRITICAL => self::CRITICAL,
-                LogLevel::ALERT => self::ALERT,
-                LogLevel::EMERGENCY => self::EMERGENCY,
-            ];
-        
-        $archivist = (new ArchivistFactory())
-            ->setConverting($toLevel)
-            ->setGlobal('Global process')
-            ->setLocal('Example of Archivist using')
-            ->setMaximal(LogLevel::DEBUG)
-            ->make($logger);        
-        try {
-            $archivist->start(LogLevel::NOTICE, 'start test');
-            /* The FileLogger will write logs only
-            if exception will be occur */
-            $archivist->debug('some debug info');
-            /* some algorithm steps */
-            $archivist->success(
-                LogLevel::NOTICE, 
-                'finish with success'
-            );
-        } catch (Throwable $e) {
-            $message = "message: {$e->getMessage()}," .
-                " trace:{$e->getTraceAsString()}";
-            $archivist->critical($message);
+use Psr\Log\LogLevel;
+use Integration\FileLogger;
+use SbWereWolf\BatchLogger\ArchivistFactory;
 
-            $archivist->failure(
-                LogLevel::NOTICE,
-                'finish with failure'
-            );
-        }
-        fclose($file);
+const EMERGENCY = 0;
+const ALERT = 1;
+const CRITICAL = 2;
+const ERROR = 3;
+const WARNING = 4;
+const NOTICE = 5;
+const INFO = 6;
+const DEBUG = 7;
+     
+$filePath = date('Ymd') . '.log';
+$file = fopen($filePath, 'a');        
+$logger = new FileLogger($file);
+
+$toLevel = [
+        LogLevel::DEBUG => DEBUG,
+        LogLevel::INFO => INFO,
+        LogLevel::NOTICE => NOTICE,
+        LogLevel::WARNING => WARNING,
+        LogLevel::ERROR => ERROR,
+        LogLevel::CRITICAL => CRITICAL,
+        LogLevel::ALERT => ALERT,
+        LogLevel::EMERGENCY => EMERGENCY,
+    ];
+
+$archivist = (new ArchivistFactory())
+    ->setParent('Global process')
+    ->setChild('Example of Archivist using')
+    ->setConverting($toLevel)
+    ->setLevel(LogLevel::DEBUG)
+    ->make($logger);        
+try {
+    $archivist->start(LogLevel::NOTICE, 'start process');
+    /* Add to journal some algorithm notes */
+    $archivist->debug('some debug info');
+    /* If process finish with no errors - write brief to logs */
+    $archivist->writeBrief(
+        LogLevel::NOTICE, 
+        'process finish with success'
+    );
+} catch (Throwable $e) {
+    $message = "message: {$e->getMessage()}," .
+        " trace:{$e->getTraceAsString()}";
+    $archivist->critical($message);
+
+    /* If some exception will occur - write detail logs */
+    $archivist->writeDetails(
+        LogLevel::NOTICE,
+        'process finish with failure'
+    );
+}
+fclose($file);
 ```
-Если код отработает без сбоев, то в логах будет две записи:
-- start test
-- finish with success
+Если код отработает без сбоев, то в логах будет два сообщения:
+- start process
+- process finish with success
 
-Если при работе кода произойдёт сбой, то в логи будет записано всё:
-- start test
+Если при работе кода произойдёт сбой, то в логи будут записаны все
+сообщения:
+- start process
 - some debug info
 - message: `exception`, trace: `exception code trace`
-- finish with failure
+- process finish with failure
 
 Для более наглядной демонстрации работы написаны тесты, просто
 запустите, и сразу увидите в каких случаях, сколько записей попадает в
@@ -112,14 +127,13 @@
 
 Для непосредственной записи в логи, необходимо передать экземпляр
 поддерживающий интерфейс `LoggerInterface` в метод
-`ArchivistFactory::make()` - для непосредственного создания экземпляра
-`Archivist`.
+`ArchivistFactory::make()` (создания экземпляра `Archivist`).
 
 # Особенности
 Поскольку логи сохраняются в оперативную память, использовать
 `Archivist` следует только для коротких процессов, для которых
-обязательно будут вызваны методы `Archivist::success()` или
-`Archivist::failure()`.
+обязательно будут вызваны методы `Archivist::writeBrief()` или
+`Archivist::writeDetails()`.
 
 Если эти методы не будут вызваны, то вся доступная оперативная память
 будет забита логами. Очистка списка сообщений происходит только при
