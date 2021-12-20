@@ -29,47 +29,37 @@
 # Пример использования
 
 ```php
-use Psr\Log\LogLevel;
 use Integration\FileLogger;
 use SbWereWolf\BatchLogger\ArchivistFactory;
-
-const EMERGENCY = 0;
-const ALERT = 1;
-const CRITICAL = 2;
-const ERROR = 3;
-const WARNING = 4;
-const NOTICE = 5;
-const INFO = 6;
-const DEBUG = 7;
      
 $filePath = date('Ymd') . '.log';
 $file = fopen($filePath, 'a');        
 $logger = new FileLogger($file);
 
 $toLevel = [
-        LogLevel::DEBUG => DEBUG,
-        LogLevel::INFO => INFO,
-        LogLevel::NOTICE => NOTICE,
-        LogLevel::WARNING => WARNING,
-        LogLevel::ERROR => ERROR,
-        LogLevel::CRITICAL => CRITICAL,
-        LogLevel::ALERT => ALERT,
-        LogLevel::EMERGENCY => EMERGENCY,
+        'debug' => 7,
+        'info' => 6,
+        'notice' => 5,
+        'warning' => 4,
+        'error' => 3,
+        'critical' => 2,
+        'alert' => 1,
+        'emergency' => 0,
     ];
 
 $archivist = (new ArchivistFactory())
     ->setParent('Global process')
     ->setChild('Example of Archivist using')
     ->setConverting($toLevel)
-    ->setLevel(LogLevel::DEBUG)
+    ->setLevel('debug')
     ->make($logger);        
 try {
-    $archivist->start(LogLevel::NOTICE, 'start process');
+    $archivist->start('notice', 'start process');
     /* Add to journal some algorithm notes */
     $archivist->debug('some debug info');
     /* If process finish with no errors - write brief to logs */
     $archivist->writeBrief(
-        LogLevel::NOTICE, 
+        'notice', 
         'process finish with success'
     );
 } catch (Throwable $e) {
@@ -79,7 +69,7 @@ try {
 
     /* If some exception will occur - write detail logs */
     $archivist->writeDetails(
-        LogLevel::NOTICE,
+        'notice',
         'process finish with failure'
     );
 }
